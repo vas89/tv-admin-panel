@@ -53,8 +53,16 @@ class TVAdminApp(ctk.CTk):
         self.status_label = ctk.CTkLabel(self, text="Введите IP-адрес ТВ и нажмите Подключиться", text_color="yellow", font=ctk.CTkFont(size=13))
         self.status_label.pack(side="bottom", fill="x", pady=15)
 
-    def setup_crypto_keys(self):
-        adbkey = "adbkey"
+        def setup_crypto_keys(self):
+        """Создание секретных ключей для авторизации на ТВ в безопасной папке пользователя"""
+        # Создаем скрытую папку .tv_admin в домашней директории пользователя, где всегда есть права на запись
+        user_home = os.path.expanduser("~")
+        config_dir = os.path.join(user_home, ".tv_admin")
+        if not os.path.exists(config_dir):
+            os.makedirs(config_dir)
+            
+        adbkey = os.path.join(config_dir, "adbkey")
+        
         if not os.path.exists(adbkey):
             keygen(adbkey)
         with open(adbkey, 'r') as f:
@@ -62,6 +70,7 @@ class TVAdminApp(ctk.CTk):
         with open(adbkey + '.pub', 'r') as f:
             pub = f.read()
         return PythonRSASigner(pub, priv)
+
 
     def set_status(self, text, color="white"):
         self.status_label.configure(text=text, text_color=color)
